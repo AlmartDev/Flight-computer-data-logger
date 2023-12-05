@@ -5,7 +5,7 @@ RH_RF95 driver;
 const char rocketData;
 
 void initComms() {
-    Serial.println("Initializing LoRa comms");
+    Serial.println("(LAUNCH CONTROL) Initializing LoRa comms");
     if (!driver.init()) {
         Serial.println("ERROR");
     }
@@ -42,6 +42,9 @@ void loop() {
 
   // rocketData = recieveData();
   // Serial.println(rocketData);
+
+  Serial.println(rocketData);
+  Serial.println(" ");
 
   delay(500);
 }
