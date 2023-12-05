@@ -14,6 +14,7 @@ int temperature;
 
 RH_RF95 driver;
 Servo servo1, servo2;
+Adafruit_BMP085 barometer;
 
 // Inits -----------------------------
 
