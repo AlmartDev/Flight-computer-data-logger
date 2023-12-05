@@ -110,10 +110,11 @@ void loop() {
 
     // Examples
     // sendData(temperature);
-
+    //
     //    if (recieveData() == "parachute") {
     //        deployParachute();
     //    }
+    //
 
     delay(500);
 }
