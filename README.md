@@ -22,5 +22,6 @@ VScode used but works fine on Arduino IDE (v2)
 - 7.4V 2S LiPo battery with Deans T connector
 
 # PCB images
-![pcb](http://url/to/img.png)
-![sheet](http://url/to/img.png)
+![pcb](https://github.com/AlmartDev/Rocket/blob/main/Img/pic1.PNG)
+
+![sheet](https://github.com/AlmartDev/Rocket/blob/main/Img/pic2.PNG)
