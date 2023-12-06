@@ -20,3 +20,7 @@ VScode used but works fine on Arduino IDE (v2)
 - Arduino Nano
 - 5 gram. servos
 - 7.4V 2S LiPo battery with Deans T connector
+
+# PCB images
+![pcb](http://url/to/img.png)
+![sheet](http://url/to/img.png)
