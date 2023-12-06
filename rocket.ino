@@ -31,7 +31,9 @@ void initComms() {
         Serial.println("ERROR");
         // shutDown();
     }
-    Serial.println("done.");
+    else
+        Serial.println("done.");
+
     driver.setFrequency(915.0);
 
     sendData("LoRa Comms inited ----------------");
@@ -57,8 +59,8 @@ void initBarometric() {
         // Serial.println("ERROR");
         while (1) {}
     }
-
-    sendData("done.");
+    else 
+        sendData("done.");
     // Serial.println("done.");
 
     // Read presure and calculate altitude at start
@@ -106,7 +108,7 @@ void updateBarometric() {
 
     // altitude calculation
     //                     Actual altitude (sea level)      Start Altitude (sea level)
-    float altitude = barometer.readAltitude(startPressure) - startAltitude;     // this will give the change in the altitude
+    altitude = barometer.readAltitude(startPressure) - startAltitude;     // this will give the change in the altitude
 
     // Serial.println(altitude);
 
@@ -114,8 +116,8 @@ void updateBarometric() {
     sendData(altitude);
 }
 
-void updateSDBoard() {  /* REVIEW THIS */
-    String dataString = recieveData();
+void updateSDBoard(char data) {  /* REVIEW THIS */
+    String dataString = data;
 
     // read three sensors and append to the string:
     for (int analogPin = 0; analogPin < 3; analogPin++) {
@@ -166,9 +168,9 @@ void loop() {
     // Examples
     // sendData(temperature);
     //
-    //    if (recieveData() == "parachute") {
-    //        deployParachute();
-    //    }
+    // if (recieveData() == "parachute") {
+    //     deployParachute();
+    // }
     //
 
     delay(500);
