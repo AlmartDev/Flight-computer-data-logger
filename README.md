@@ -7,6 +7,10 @@ The code is capable of communicate remotely to each platform. The rocket should 
 
 Launch pad only turns on the engine after both rocket's firmware and launch control are ready for start. It will have a countback of 60 seconds.
 
+# Software used
+VScode used but works fine on Arduino IDE (v2)
+**components may need their own libraries to work**
+
 # Components used
 - Custom printed board (gerber file)
 - Adafruit MPU6050
