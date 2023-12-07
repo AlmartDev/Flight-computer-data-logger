@@ -14,8 +14,8 @@ void initBarometric() {
         Serial.println("ERROR");
         while (1) {}
     }
-
-    Serial.println("done.");
+    else
+        Serial.println("done.");
 
     startPressure = barometer.readPressure();
     startAltitude = barometer.readAltitude(startPressure);
@@ -32,5 +32,6 @@ void update() {
     altitude = barometer.readAltitude(startPressure) - startAltitude;   
 
     Serial.println(altitude);
-    Serial.println(temperature);
+    Serial.print(" - t:")
+    Serial.print(temperature);
 }

@@ -7,7 +7,8 @@ void initComms() {
     if (!driver.init()) {
         Serial.println("ERROR");
     }
-    Serial.println("done.");
+    else
+        Serial.println("done.");
     driver.setFrequency(915.0);
 }
 
