@@ -1,0 +1,7 @@
+adafruit bmp180
+adafruit mpu6050
+servo
+liquied crystal
+wire
+RH_RF95
+spi/sd

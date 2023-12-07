@@ -3,6 +3,11 @@
 Servo servo;
 
 void setup() {
+    Serial.begin(9600);
+
+    Serial.println("Servos initialized")
+    Serial.println("done.")
+
     servo.attach(A0);
     servo.write(90);
 }

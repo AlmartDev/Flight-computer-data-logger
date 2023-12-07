@@ -9,7 +9,12 @@ Launch pad only turns on the engine after both rocket's firmware and launch cont
 
 # Software used
 VScode used but works fine on Arduino IDE (v2)
+
 **components may need their own libraries to work**
+
+# How to use
+Simply install all requiered librearies and upload the code to the rocket/launch pad/launch control.
+To make sure everything works at first you can use the components tests.
 
 # Components used
 - Custom printed board (gerber file)
