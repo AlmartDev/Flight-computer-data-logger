@@ -1,9 +1,12 @@
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
-int startAltitude, altitude;
-int startPressure;
-int temperature;
+LiquidCrystal_I2C lcd(0x27, 16, 2);  // Change the parameters if your LCD is different
+
+
+float startAltitude, altitude;
+float startPressure;
 
 Adafruit_BMP085 barometer;
 
@@ -24,14 +27,24 @@ void initBarometric() {
 void setup () {
     Serial.begin(9600);
     initBarometric();
+
+    lcd.begin();  // Initialize the LCD
 }
 
-void update() {
-    temperature = barometer.readTemperature();
+void loop() {
+    //temperature = barometer.readTemperature();
 
-    altitude = barometer.readAltitude(startPressure) - startAltitude;   
+    altitude = barometer.readAltitude(startPressure);  
 
-    Serial.println(altitude);
-    Serial.print(" - t:")
-    Serial.print(temperature);
+    Serial.println(altitude - startAltitude);
+    //Serial.println (" - t:");
+    //Serial.print(temperature);
+
+    lcd.setCursor(0, 0);  // Set the cursor to the top-left corner
+    lcd.print(altitude - startAltitude); 
+
+    delay(500);
+    lcd.setCursor(0, 0);  // Set the cursor to the top-left corner
+
+    lcd.print("                      "); 
 }
