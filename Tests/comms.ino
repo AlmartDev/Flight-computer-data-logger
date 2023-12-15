@@ -1,47 +1,50 @@
-// code based for the Arduino Nano/Uno and an SX1278, using frequency 915.0
-
 #include <RH_RF95.h>
 
-RH_RF95 driver;
+#define RFM95_CS 10   // SX1278 chip select pin
+#define RFM95_RST 9   // SX1278 reset pin
+#define RFM95_INT 2   // SX1278 interrupt pin (change it according to your setup)
 
-void initComms() {
-    Serial.println("Initializing LoRa comms");
-    if (!driver.init()) {
-        Serial.println("ERROR");
-    }
-    else
-        Serial.println("done.");
-
-    driver.setFrequency(915.0);
-}
-
-void sendData(const char data) {
-    driver.send((uint8_t *)data, strlen(data));
-    driver.waitPacketSent();
-}
-
-void recieveData() {
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-    uint8_t buflen = sizeof(buf);
-
-    if (driver.waitAvailableTimeout(1000)) {
-        if (driver.recv(buf, &buflen)) {
-            buf[buflen] = '\0';
-            return (char *)buf;
-        }
-    } 
-}
+RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 void setup() {
   Serial.begin(9600);
-  initComms();
+
+  if (!rf95.init()) {
+    Serial.println("LoRa initialization failed");
+    while (1);
+  }
+
+  Serial.println("LoRa initialization successful!");
+
+  // Setup ISM frequency
+  rf95.setFrequency(433.0);
+
+  // Set transmit power (range from 5 to 23, default is 13dBm)
+  rf95.setTxPower(13);
 }
 
 void loop() {
-  Serial.println(recieveData());
-  Serial.println(" ");
+  // Send a message
+  const char* messageToSend = "Hello, Arduino!";
+  rf95.send((uint8_t*)messageToSend, strlen(messageToSend));
+  rf95.waitPacketSent();
+  Serial.println("Message sent");
 
-  sendData("Hello, comms test in ./test/comms.ino")
+  // Wait for a response
+  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
 
-  delay(500);
+  if (rf95.waitAvailableTimeout(3000)) {
+    // Received a message
+    if (rf95.recv(buf, &len)) {
+      Serial.print("Received message: ");
+      Serial.println((char*)buf);
+    } else {
+      Serial.println("Receive failed");
+    }
+  } else {
+    Serial.println("No response received");
+  }
+
+  delay(5000); // Delay before sending the next message
 }
