@@ -1,9 +1,7 @@
 # Firmware
-This is an alpha test.
-
 Firmware for the rocket's flight computer (UAV) and its launch control platforms. The code is based on Arduino C++ and the Rocket's firmware is made explicitly for Arduino Nano on the custom flight computer board.
 
-The code is capable of communicate remotely to each platform. The rocket should be able to deploy its parachute remotely and automaticly and report all data to launch control and write it to the SD card module.
+The code is capable of communicate remotely to each platform. It should be able to deploy its parachute remotely and automaticly and report all data to launch control and write it to the SD card module.
 
 Launch pad only turns on the engine after both rocket's firmware and launch control are ready for start. It will have a countback of 60 seconds.
 
@@ -16,6 +14,8 @@ VScode used but works fine on Arduino IDE (v2)
 Simply install all requiered librearies and upload the code to the rocket/launch pad/launch control.
 To make sure everything works at first you can use the components tests.
 
+You can find the required libs in ```requirements.txt```
+
 # Components used
 - Custom printed board (gerber file)
 - Adafruit MPU6050
@@ -27,6 +27,8 @@ To make sure everything works at first you can use the components tests.
 - 7.4V 2S LiPo battery with Deans T connector
 
 # PCB images
+Legacy version, new model will be updated soon.
+
 ![pcb](https://github.com/AlmartDev/Rocket/blob/main/Img/pic1.PNG)
 
 ![sheet](https://github.com/AlmartDev/Rocket/blob/main/Img/pic2.PNG)
