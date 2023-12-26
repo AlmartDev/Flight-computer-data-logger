@@ -1,181 +1,130 @@
-// Code made explicitly for Arduino Nano in the Rocket's flight computer
+#include <Adafruit_BMP085.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
 
-#include <RH_RF95.h>
+#include <Wire.h>
+#include <SPI.h>
 
 #include <Servo.h>
 
-#include <Adafruit_BMP085.h>
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-
-#include <SPI.h>
 #include <SD.h>
 
-int startAltitude, altitude;
-int startPressure;
-int temperature;
+#include <LoRa.h>
 
-bool m_shutDown = false;
-
-const int chipSelect = 10;
-
-RH_RF95 driver;
-Servo servo1, servo2;
+// Class instances
 Adafruit_BMP085 barometer;
+Adafruit_MPU6050 gyroscope;
+Servo servo;
 
-// Inits -----------------------------
+// Variables
+float startAltitude, altitude;
+int startPressure;
 
-void initComms() {
-    Serial.println("Initializing LoRa comms ----------------");
-    if (!driver.init()) {
+byte temperature;
+
+const byte servoPin = A0;
+const int chipSelect = 7;
+
+// Inits
+
+void initBarometric()
+{
+    Serial.print("Initializing Barometric sensors  -  ");
+
+    if (!barometer.begin())
+    {
         Serial.println("ERROR");
-        // shutDown();
+        while (1)
+        {
+        }
     }
     else
         Serial.println("done.");
 
-    driver.setFrequency(915.0);
-
-    sendData("LoRa Comms inited ----------------");
-}
-
-void initServos() {
-    sendData("Initializing Servos");
-    // Serial.println("Initializing Servos");
-
-    servo1.attach(A0);
-    servo2.attach(A1);
-
-    sendData("done.");
-    // Serial.println("done.");
-}
-
-void initBarometric() {
-    sendData("Initializing Barometric sensors");
-    // Serial.println("Initializing Barometric sensors");
-
-    if (!barometer.begin()) {
-        sendData("ERROR");
-        // Serial.println("ERROR");
-        while (1) {}
-    }
-    else 
-        sendData("done.");
-    // Serial.println("done.");
-
-    // Read presure and calculate altitude at start
     startPressure = barometer.readPressure();
     startAltitude = barometer.readAltitude(startPressure);
 }
 
-void initSDBoard() {
-    //Serial.print("Initializing SD card...");
-    sendData("Initializing SD card");
-    // see if the card is present and can be initialized:
-    if (!SD.begin(chipSelect)) {
-        //Serial.println("ERROR");
-        sendData("ERROR");
-        // don't do anything more:
+void initCommms()
+{
+    Serial.print("Initializing LoRa comms  -  ");
+
+    if (!LoRa.begin(915E6))
+    { // initialize ratio at 915 MHz
+        Serial.println("ERROR");
+        while (true);
+    }
+    Serial.println("done.");
+    
+}
+
+void initServo()
+{
+    Serial.print("Initializing Servo  -  ");
+
+    servo.attach(servoPin);
+    servo.write(0); // CHANGE BEFORE FLIGHT -------------
+
+    Serial.println("done.");
+}
+
+void initSD()
+{
+    Serial.print("Initializing SD card  -  ");
+
+    if (!SD.begin(chipSelect))
+    {
+        Serial.println("ERROR");
         while (1);
     }
-    else 
-        sendData("done.");
+    Serial.println("done.");
 }
 
-// Inits -----------------------------
+void initGyroscope()
+{
+    Serial.print("Initializing Gyroscope/Accelerometer  -  ");
 
-void sendData(const char data = "No data.") {
-    driver.send((uint8_t *)data, strlen(data));
-    driver.waitPacketSent();
-}
-
-void recieveData() {
-    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-    uint8_t buflen = sizeof(buf);
-
-    if (driver.waitAvailableTimeout(1000)) {
-        if (driver.recv(buf, &buflen)) {
-            buf[buflen] = '\0';
-            return (char *)buf;
+    // Try to initialize!
+    if (!gyroscope.begin())
+    {
+        Serial.print("ERROR");
+        while (1)
+        {
+            delay(10);
         }
-    } 
-}
-
-// Updates -----------------------------
-
-void updateBarometric() {
-    temperature = barometer.readTemperature();
-
-    // altitude calculation
-    //                     Actual altitude (sea level)      Start Altitude (sea level)
-    altitude = barometer.readAltitude(startPressure) - startAltitude;     // this will give the change in the altitude
-
-    // Serial.println(altitude);
-
-    sendData(temperature);
-    sendData(altitude);
-}
-
-void updateSDBoard(char data) {  /* REVIEW THIS */
-    String dataString = data;
-
-    // read three sensors and append to the string:
-    for (int analogPin = 0; analogPin < 3; analogPin++) {
-      int sensor = analogRead(analogPin);
-      dataString += String(sensor);
-      if (analogPin < 2) {
-        dataString += ",";
-      }
     }
+    // setupt motion detection
+    gyroscope.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
+    gyroscope.setMotionDetectionThreshold(1);
+    gyroscope.setMotionDetectionDuration(20);
+    gyroscope.setInterruptPinLatch(true); // Keep it latched.  Will turn off when reinitialized.
+    gyroscope.setInterruptPinPolarity(true);
+    gyroscope.setMotionInterrupt(true);
 
-    // open the file. note that only one file can be open at a time,
-    // so you have to close this one before opening another.
-    File dataFile = SD.open("datalog.flightComputer", FILE_WRITE);
+    Serial.print("done.");
 
-    // if the file is available, write to it:
-    if (dataFile) {
-      dataFile.println(dataString);
-      dataFile.close();
-      // print to the serial port too:
-    }
-    // if the file isn't open, pop up an error:
-    else {
-      //Serial.println("error opening datalog.txt");
-      sendData("Error writing to SD card");
-    }
+    Serial.println("");
+    delay(100);
 }
 
-// Updates -----------------------------
+//
 
-void setup() {
-  Serial.begin(9600); // only used for debugging
+void setup()
+{
+    Serial.begin(9600);
+    Serial.println("Initializing systems...");
 
-  initComms();          // Communication
-  initServos();         // Servos
-  initBarometric();     // Barometric sensor/temperature
-  initSDBoard();        // SD card module
+
+    // initialize systems
+    initCommms();
+    initBarometric();
+    initServo();
+    initSD();
+    initGyroscope();
+
+    Serial.println("Initialization complete.");
 }
 
-void loop() {
-    // Important Systems
-    if (recieveData("off")) { shutDown(); } // When shut down signal is recieved or comms init fail, system updates are shut down
-    if (m_shutDown) { break }
-
-    // Updates
-    updateBarometric();
-    updateSDBoard();
-
-    // Examples
-    // sendData(temperature);
-    //
-    // if (recieveData() == "parachute") {
-    //     deployParachute();
-    // }
-    //
-
-    delay(500);
-}
-
-void shutDown() {
-    m_shutDown = true;
+void loop()
+{
 }
