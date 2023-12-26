@@ -1,3 +1,5 @@
+/* Flight logging system firmware for Arduino Nano */
+
 #include <Adafruit_BMP085.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
@@ -128,7 +130,7 @@ void setup()
     Serial.println("");
 
     // Write beggining of logs
-    writeSD("FLIGHT LOG SYSTEM STARTED!");
+    // writeSD("FLIGHT LOGGING STARTED");
 }
 
 // Systems
@@ -145,7 +147,23 @@ void recieveData()
 
 // --------------
 
-void writeSD(String data)
+// TODO: dont use String for data :)
+void writeSD(char* data)
+{
+    File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
+
+    if (dataFile)
+    {
+        dataFile.print(data);
+        dataFile.close();
+    }
+    else
+    {
+        Serial.println("ERROR opening DATALOG.txt");
+    }
+}
+
+void writeSDln(char* data)
 {
     File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
 
@@ -176,9 +194,31 @@ void updateBarometric()
     */
 }
 
+void updateGyroscope(){
+    if(gyroscope.getMotionInterruptStatus()) {
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    gyroscope.getEvent(&a, &g, &temp);
+
+    /*
+    Serial.print("GyroX:");
+    Serial.print(g.gyro.x);
+    Serial.print(",");
+    Serial.print("GyroY:");
+    Serial.print(g.gyro.y);
+    Serial.print(",");
+    Serial.print("GyroZ:");
+    Serial.print(g.gyro.z);
+    Serial.println("");
+    */
+  }
+}
+
 void loop()
 {
+    // just updates, no loggin or sending yet
     updateBarometric();
-    // sutffs left here!
+    updateGyroscope();
+
     delay(100); // updates every 10 times/s
 }
