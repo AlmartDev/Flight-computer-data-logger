@@ -17,13 +17,15 @@ Adafruit_MPU6050 gyroscope;
 Servo servo;
 
 // Variables
-float startAltitude, altitude;
+float startAltitude, altitude, realAltitude;
 int startPressure;
 
 byte temperature;
 
 const byte servoPin = A0;
-const int chipSelect = 7;
+const byte chipSelect = 7;
+
+char *data;
 
 // Inits
 
@@ -52,10 +54,10 @@ void initCommms()
     if (!LoRa.begin(915E6))
     { // initialize ratio at 915 MHz
         Serial.println("ERROR");
-        while (true);
+        while (true)
+            ;
     }
     Serial.println("done.");
-    
 }
 
 void initServo()
@@ -75,7 +77,8 @@ void initSD()
     if (!SD.begin(chipSelect))
     {
         Serial.println("ERROR");
-        while (1);
+        while (1)
+            ;
     }
     Serial.println("done.");
 }
@@ -114,7 +117,6 @@ void setup()
     Serial.begin(9600);
     Serial.println("Initializing systems...");
 
-
     // initialize systems
     initCommms();
     initBarometric();
@@ -123,8 +125,60 @@ void setup()
     initGyroscope();
 
     Serial.println("Initialization complete.");
+    Serial.println("");
+
+    // Write beggining of logs
+    writeSD("FLIGHT LOG SYSTEM STARTED!");
+}
+
+// Systems
+void SendData(const char *data)
+{
+    // Send data
+}
+
+void recieveData()
+{
+    // Recieve data
+    return data;
+}
+
+// --------------
+
+void writeSD(String data)
+{
+    File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
+
+    if (dataFile)
+    {
+        dataFile.println(data);
+        dataFile.close();
+    }
+    else
+    {
+        Serial.println("ERROR opening DATALOG.txt");
+    }
+}
+
+// updates
+void updateBarometric()
+{
+    temperature = barometer.readTemperature();
+    altitude = barometer.readAltitude(startPressure);
+
+    realAltitude = altitude - startAltitude;
+
+    /*
+    Serial.print ("a:");
+    Serial.print(altitude - startAltitude);
+    Serial.print (" - t:");
+    Serial.println(temperature);
+    */
 }
 
 void loop()
 {
+    updateBarometric();
+    // sutffs left here!
+    delay(100); // updates every 10 times/s
 }
