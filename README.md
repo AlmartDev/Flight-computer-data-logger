@@ -26,9 +26,5 @@ You can find the required libs in ```requirements.txt```
 - 5 gram. servos
 - 7.4V 2S LiPo battery with Deans T connector
 
-# PCB images
-Legacy version, new model will be updated soon.
-
-![pcb](https://github.com/AlmartDev/Rocket/blob/main/Img/pic1.PNG)
-
-![sheet](https://github.com/AlmartDev/Rocket/blob/main/Img/pic2.PNG)
+# PCB
+pcb design can be found here https://oshwlab.com/alonsomartinezcarratala/rocket
