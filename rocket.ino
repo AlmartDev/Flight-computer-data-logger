@@ -142,7 +142,7 @@ void SendData(const char *data)
 void recieveData()
 {
     // Recieve data
-    return data;
+    // return data;
 }
 
 // --------------

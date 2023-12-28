@@ -8,7 +8,6 @@ void setup(void) {
   Serial.begin(9600);
   while (!Serial)
     delay(10); // will pause Zero, Leonardo, etc until serial console opens
-
   Serial.print("Initializing Gyroscope/Accelerometer  -  ");
 
   // Try to initialize!

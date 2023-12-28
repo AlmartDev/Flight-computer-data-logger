@@ -1,8 +1,8 @@
-#include <servo.h>
+#include <Servo.h>
 
 Servo servo;
 
-byte servoPin = 9;
+int servoPin = 9;
 
 void setup() { 
     // print servo is initialized
