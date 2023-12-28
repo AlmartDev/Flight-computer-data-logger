@@ -20,6 +20,8 @@ Servo servo;
 
 // Variables
 float startAltitude, altitude, realAltitude;
+float apogee = 2;   // Highers altitude reached, starts on 2 so rocket doesnt think its at apogee at start
+
 int startPressure;
 
 byte temperature;
@@ -28,6 +30,8 @@ const byte servoPin = A0;
 const byte chipSelect = 7;
 
 char *data;
+
+bool isFalling = false;
 
 // Inits
 
@@ -38,9 +42,7 @@ void initBarometric()
     if (!barometer.begin())
     {
         Serial.println("ERROR");
-        while (1)
-        {
-        }
+        while (1);
     }
     else
         Serial.println("done.");
@@ -56,8 +58,7 @@ void initCommms()
     if (!LoRa.begin(915E6))
     { // initialize ratio at 915 MHz
         Serial.println("ERROR");
-        while (true)
-            ;
+        while (true);
     }
     Serial.println("done.");
 }
@@ -79,8 +80,7 @@ void initSD()
     if (!SD.begin(chipSelect))
     {
         Serial.println("ERROR");
-        while (1)
-            ;
+        while (1);
     }
     Serial.println("done.");
 }
@@ -130,7 +130,7 @@ void setup()
     Serial.println("");
 
     // Write beggining of logs
-    // writeSD("FLIGHT LOGGING STARTED");
+    writeSD("FLIGHT LOGGING STARTED");
 }
 
 // Systems
@@ -184,14 +184,25 @@ void updateBarometric()
     temperature = barometer.readTemperature();
     altitude = barometer.readAltitude(startPressure);
 
+    float previousAltitude = realAltitude;
+
     realAltitude = altitude - startAltitude;
 
-    /*
+    /*   
     Serial.print ("a:");
     Serial.print(altitude - startAltitude);
     Serial.print (" - t:");
     Serial.println(temperature);
     */
+
+    if (realAltitude < previousAltitude)
+    {
+        apogee = previousAltitude;
+        isFalling = true;
+    }
+
+    if (realAltitude > apogee)
+        apogee = realAltitude;
 }
 
 void updateGyroscope(){
@@ -211,14 +222,41 @@ void updateGyroscope(){
     Serial.print(g.gyro.z);
     Serial.println("");
     */
+    
   }
 }
 
+void deployParachute()
+{
+    servo.write(180);   // CHANGE BEFORE FLIGHT -------------
+}
+
+
 void loop()
 {
-    // just updates, no loggin or sending yet
+    // updates
     updateBarometric();
     updateGyroscope();
+
+    // check for parachute deployment
+    if (realAltitude > 2 && isFalling) { deployParachute(); }
+    //if (recieveData("parachute")) { deployParachute(); }
+
+    bool apogeeSent = false;
+    if (isFalling && !apogeeSent)
+    {
+        writeSDln("APOGEE REACHED");
+        writeSD("APOGEE: ");
+        //writeSDln(apogee);
+
+        //SendData("APOGEE REACHED");
+        //SendData(apogee);
+
+        Serial.print("APOGEE REACHED:  ");
+        Serial.println(apogee);
+
+        apogeeSent = true; // only send once
+    }
 
     delay(100); // updates every 10 times/s
 }
