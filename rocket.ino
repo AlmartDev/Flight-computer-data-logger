@@ -20,7 +20,7 @@ Servo servo;
 
 // Variables
 float startAltitude, altitude, realAltitude;
-float apogee = 2;   // Highers altitude reached, starts on 2 so rocket doesnt think its at apogee at start
+float apogee = 2; // Highers altitude reached, starts on 2 so rocket doesnt think its at apogee at start
 
 int startPressure;
 
@@ -28,8 +28,6 @@ byte temperature;
 
 const byte servoPin = A0;
 const byte chipSelect = 7;
-
-char *data;
 
 bool isFalling = false;
 
@@ -42,7 +40,8 @@ void initBarometric()
     if (!barometer.begin())
     {
         Serial.println("ERROR");
-        while (1);
+        while (1)
+            ;
     }
     else
         Serial.println("done.");
@@ -58,7 +57,8 @@ void initCommms()
     if (!LoRa.begin(915E6))
     { // initialize ratio at 915 MHz
         Serial.println("ERROR");
-        while (true);
+        while (true)
+            ;
     }
     Serial.println("done.");
 }
@@ -80,7 +80,8 @@ void initSD()
     if (!SD.begin(chipSelect))
     {
         Serial.println("ERROR");
-        while (1);
+        while (1)
+            ;
     }
     Serial.println("done.");
 }
@@ -133,22 +134,36 @@ void setup()
     writeSD("FLIGHT LOGGING STARTED");
 }
 
-// Systems
-void SendData(const char *data)
+template <typename T>
+void SendData(const T &data)
 {
-    // Send data
+    LoRa.beginPacket();
+    LoRa.print(String(data));
+    LoRa.endPacket();
 }
 
-void recieveData()
+String recieveData()
 {
-    // Recieve data
-    // return data;
+    if (LoRa.parsePacket())
+    {
+        String recievedData = "";
+
+        while (LoRa.available())
+        {
+            recievedData += (char)LoRa.read();
+        }
+
+        //Serial.print("Received: ");
+        //Serial.println(recievedData);
+
+        return recievedData;
+    }
 }
 
 // --------------
 
-// TODO: dont use String for data :)
-void writeSD(char* data)
+template <typename W>
+void writeSD(const W &data)
 {
     File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
 
@@ -163,13 +178,16 @@ void writeSD(char* data)
     }
 }
 
-void writeSDln(char* data)
+template <typename Wr>
+void writeSDln(const Wr &data)
 {
     File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
 
     if (dataFile)
     {
         dataFile.println(data);
+        template <typename T>
+
         dataFile.close();
     }
     else
@@ -188,7 +206,7 @@ void updateBarometric()
 
     realAltitude = altitude - startAltitude;
 
-    /*   
+    /*
     Serial.print ("a:");
     Serial.print(altitude - startAltitude);
     Serial.print (" - t:");
@@ -205,32 +223,32 @@ void updateBarometric()
         apogee = realAltitude;
 }
 
-void updateGyroscope(){
-    if(gyroscope.getMotionInterruptStatus()) {
-    /* Get new sensor events with the readings */
-    sensors_event_t a, g, temp;
-    gyroscope.getEvent(&a, &g, &temp);
+void updateGyroscope()
+{
+    if (gyroscope.getMotionInterruptStatus())
+    {
+        /* Get new sensor events with the readings */
+        sensors_event_t a, g, temp;
+        gyroscope.getEvent(&a, &g, &temp);
 
-    /*
-    Serial.print("GyroX:");
-    Serial.print(g.gyro.x);
-    Serial.print(",");
-    Serial.print("GyroY:");
-    Serial.print(g.gyro.y);
-    Serial.print(",");
-    Serial.print("GyroZ:");
-    Serial.print(g.gyro.z);
-    Serial.println("");
-    */
-    
-  }
+        /*
+        Serial.print("GyroX:");
+        Serial.print(g.gyro.x);
+        Serial.print(",");
+        Serial.print("GyroY:");
+        Serial.print(g.gyro.y);
+        Serial.print(",");
+        Serial.print("GyroZ:");
+        Serial.print(g.gyro.z);
+        Serial.println("");
+        */
+    }
 }
 
 void deployParachute()
 {
-    servo.write(180);   // CHANGE BEFORE FLIGHT -------------
+    servo.write(180); // CHANGE BEFORE FLIGHT -------------
 }
-
 
 void loop()
 {
@@ -239,18 +257,21 @@ void loop()
     updateGyroscope();
 
     // check for parachute deployment
-    if (realAltitude > 2 && isFalling) { deployParachute(); }
-    //if (recieveData("parachute")) { deployParachute(); }
+    if (realAltitude > 2 && isFalling)
+        deployParachute();
+    else if (recieveData() == "DEPLOY")
+        deployParachute(); 
 
+    // Apogee sending
     bool apogeeSent = false;
     if (isFalling && !apogeeSent)
     {
         writeSDln("APOGEE REACHED");
         writeSD("APOGEE: ");
-        //writeSDln(apogee);
+        writeSDln(apogee);
 
-        //SendData("APOGEE REACHED");
-        //SendData(apogee);
+        SendData("APOGEE REACHED");
+        SendData(apogee);
 
         Serial.print("APOGEE REACHED:  ");
         Serial.println(apogee);
