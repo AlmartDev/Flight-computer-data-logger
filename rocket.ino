@@ -19,6 +19,8 @@ Adafruit_MPU6050 gyroscope;
 Servo servo;
 
 // Variables
+// It uses around 90% of the Arduino nano's memory, so some optimizations are needed for future versions
+
 float startAltitude, altitude, realAltitude;
 float apogee = 2; // Highers altitude reached, starts on 2 so rocket doesnt think its at apogee at start
 
@@ -113,7 +115,7 @@ void initGyroscope()
     delay(100);
 }
 
-//
+// Setup
 
 void setup()
 {
@@ -134,8 +136,12 @@ void setup()
     writeSD("FLIGHT LOGGING STARTED");
 }
 
-template <typename T>
-void SendData(const T &data)
+// --------------
+
+// Remote comms
+
+template <typename remoteData>
+void SendData(remoteData data)
 {
     LoRa.beginPacket();
     LoRa.print(String(data));
@@ -162,8 +168,8 @@ String recieveData()
 
 // --------------
 
-template <typename W>
-void writeSD(const W &data)
+template <typename writeData>
+void writeSD(writeData data)
 {
     File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
 
@@ -178,16 +184,14 @@ void writeSD(const W &data)
     }
 }
 
-template <typename Wr>
-void writeSDln(const Wr &data)
+template <typename writeDataLn>
+void writeSDln(writeDataLn data)
 {
     File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
 
     if (dataFile)
     {
         dataFile.println(data);
-        template <typename T>
-
         dataFile.close();
     }
     else
@@ -212,6 +216,8 @@ void updateBarometric()
     Serial.print (" - t:");
     Serial.println(temperature);
     */
+
+   // Calculate apogee and if falling
 
     if (realAltitude < previousAltitude)
     {
@@ -248,6 +254,10 @@ void updateGyroscope()
 void deployParachute()
 {
     servo.write(180); // CHANGE BEFORE FLIGHT -------------
+                      // angle of 0 degrees should also work 
+
+    //writeSDln("PARACHUTE DEPLOYED");
+    //SendData("PARACHUTE DEPLOYED");
 }
 
 void loop()
@@ -257,9 +267,9 @@ void loop()
     updateGyroscope();
 
     // check for parachute deployment
-    if (realAltitude > 2 && isFalling)
+    if (realAltitude > 2 && isFalling)  // deploy parachute if falling and above 2m
         deployParachute();
-    else if (recieveData() == "DEPLOY")
+    else if (recieveData() == "DEPLOY") // deploy parachute if recieve "DEPLOY" from ground
         deployParachute(); 
 
     // Apogee sending
@@ -276,7 +286,7 @@ void loop()
         Serial.print("APOGEE REACHED:  ");
         Serial.println(apogee);
 
-        apogeeSent = true; // only send once
+        apogeeSent = true; // only send the apogee once
     }
 
     delay(100); // updates every 10 times/s
