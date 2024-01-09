@@ -10,24 +10,24 @@ This repository contains the firmware for the rocket's flight computer (UAV) and
 The launch pad initiates engine activation only when both the rocket's firmware and launch control are ready for launch. A countdown of 60 seconds ensures a systematic start.
 
 ## Software Environment
-The code is developed using VSCode, but it is compatible with Arduino IDE (v2). Ensure that the required components have their own libraries to function correctly.
+The code is developed using VSCode, but it is compatible with any IDE you want. Ensure that the required components have their own libraries to function correctly.
 
 ## How to Use
 1. Install all required libraries listed in `requirements.txt`.
-2. Upload the code to the respective rocket, launch pad, or launch control.
+2. Upload the code to the respective rocket, launch pad, or launch control. (if needed)
 3. Verify functionality by performing component tests initially.
 
 ## Components Used
-- Custom printed board (gerber file)
+- Custom printed board (see below)
 - Adafruit MPU6050
 - Adafruit BMP180
-- Adafruit breakout board+ with 2GB MicroSD card
-- SX1278 LoRa-02
+- Adafruit breakout board+ with 8GB MicroSD card (FAT32 format)
+- SX1278 LoRa-02 with antenna
 - Arduino Nano
 - 5 gram. servos
 - 7.4V 2S LiPo battery with Deans T connector
 
 ## PCB Design
-The PCB design is available at [this link](https://oshwlab.com/alonsomartinezcarratala/rocket).
+The PCB design is available at [this link](https://oshwlab.com/alonsomartinezcarratala/rocket). But you can download the gerber file from the repository.
 
 Feel free to contribute and make improvements to the firmware for a more successful rocket launch!
