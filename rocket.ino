@@ -1,5 +1,6 @@
 /* Flight logging system firmware for Arduino Nano */
 
+// Including
 #include <Adafruit_BMP085.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
@@ -132,8 +133,9 @@ void setup()
     Serial.println("Initialization complete.");
     Serial.println("");
 
-    // Write beggining of logs
-    writeSD("FLIGHT LOGGING STARTED");
+    // clear SD card before logging
+    clearSD();
+    writeSD("LOGGING STARTED");
 }
 
 // --------------
@@ -141,14 +143,14 @@ void setup()
 // Remote comms
 
 template <typename remoteData>
-void SendData(remoteData data)
+void SendData(remoteData data)  // sends data to ground station, all data will be send in a new line
 {
     LoRa.beginPacket();
     LoRa.print(String(data));
     LoRa.endPacket();
 }
 
-String recieveData()
+String recieveData()    // returns recieved data as string
 {
     if (LoRa.parsePacket())
     {
@@ -167,6 +169,21 @@ String recieveData()
 }
 
 // --------------
+
+void clearSD()
+{
+    File dataFile = SD.open("DATALOG.txt", FILE_WRITE  | O_TRUNC);
+
+    if (dataFile)
+    {
+        dataFile.println("");
+        dataFile.close();
+    }
+    else
+    {
+        Serial.println("ERROR opening DATALOG.txt");
+    }
+}
 
 template <typename writeData>
 void writeSD(writeData data)
