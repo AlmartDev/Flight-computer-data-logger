@@ -154,8 +154,6 @@ String recieveData()    // returns recieved data as string
 {
     if (LoRa.parsePacket())
     {
-        String recievedData = "";
-
         while (LoRa.available())
         {
             recievedData += (char)LoRa.read();
@@ -164,7 +162,7 @@ String recieveData()    // returns recieved data as string
         //Serial.print("Received: ");
         //Serial.println(recievedData);
 
-        return recievedData;
+        return recieveData;
     }
 }
 
