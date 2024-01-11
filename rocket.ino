@@ -22,12 +22,11 @@ Servo servo;
 // Variables
 // It uses around 90% of the Arduino nano's memory, so some optimizations are needed for future versions
 
-float startAltitude, altitude, realAltitude;
-float apogee = 2; // Highers altitude reached, starts on 2 so rocket doesnt think its at apogee at start
+byte startAltitude, altitude, realAltitude;
+byte apogee;
+byte temperature;
 
 int startPressure;
-
-byte temperature;
 
 const byte servoPin = A0;
 const byte chipSelect = 7;
@@ -39,16 +38,18 @@ bool isFalling = false;
 void initBarometric()
 {
     Serial.print("Initializing Barometric sensors  -  ");
+    //SendData("Initializing Barometric sensors  -  ");
 
     if (!barometer.begin())
     {
         Serial.println("ERROR");
+        //SendData("ERROR");
         while (1)
             ;
     }
-    else
-        Serial.println("done.");
-
+    Serial.println("done.");
+    //SendData("done.");
+    
     startPressure = barometer.readPressure();
     startAltitude = barometer.readAltitude(startPressure);
 }
@@ -56,47 +57,63 @@ void initBarometric()
 void initCommms()
 {
     Serial.print("Initializing LoRa comms  -  ");
+    //SendData("Initializing LoRa comms  -  ");
 
-    if (!LoRa.begin(915E6))
-    { // initialize ratio at 915 MHz
+    if (!LoRa.begin(915E6))  // initialize ratio at 915 MHz
+    { 
         Serial.println("ERROR");
+        //SendData("ERROR");
         while (true)
             ;
     }
     Serial.println("done.");
+    //SendData("done.");
 }
 
 void initServo()
 {
     Serial.print("Initializing Servo  -  ");
+    //SendData("Initializing Servo  -  ");
 
-    servo.attach(servoPin);
+    if (!servo.attach(servoPin)) 
+    {
+        Serial.println("ERROR");
+        //SendData("ERROR");
+        while (true)
+            ;
+    }
     servo.write(0); // CHANGE BEFORE FLIGHT -------------
 
     Serial.println("done.");
+    //SendData("done.");
 }
 
 void initSD()
 {
     Serial.print("Initializing SD card  -  ");
+    //SendData("Initializing SD card  -  ");
 
     if (!SD.begin(chipSelect))
     {
         Serial.println("ERROR");
+        //SendData("ERROR");
         while (1)
             ;
     }
     Serial.println("done.");
+    //SendData("done.");
 }
 
 void initGyroscope()
 {
     Serial.print("Initializing Gyroscope/Accelerometer  -  ");
+    //SendData("Initializing Gyroscope/Accelerometer  -  ");
 
     // Try to initialize!
     if (!gyroscope.begin())
     {
         Serial.print("ERROR");
+        //SendData("ERROR");
         while (1)
         {
             delay(10);
@@ -111,6 +128,9 @@ void initGyroscope()
     gyroscope.setMotionInterrupt(true);
 
     Serial.print("done.");
+    //SendData("done.");
+
+    apogee = 2; // So computer doesn't think it is on apogee at start.
 
     Serial.println("");
     delay(100);
@@ -122,6 +142,7 @@ void setup()
 {
     Serial.begin(9600);
     Serial.println("Initializing systems...");
+    //SendData("Initializing systems...");
 
     // initialize systems
     initCommms();
@@ -132,6 +153,8 @@ void setup()
 
     Serial.println("Initialization complete.");
     Serial.println("");
+
+    // SendData("Initialization complete.");
 
     // clear SD card before logging
     clearSD();
