@@ -75,13 +75,7 @@ void initServo()
     Serial.print("Initializing Servo  -  ");
     //SendData("Initializing Servo  -  ");
 
-    if (!servo.attach(servoPin)) 
-    {
-        Serial.println("ERROR");
-        //SendData("ERROR");
-        while (true)
-            ;
-    }
+    servo.attach(servoPin);
     servo.write(0); // CHANGE BEFORE FLIGHT -------------
 
     Serial.println("done.");
@@ -173,19 +167,13 @@ void SendData(remoteData data)  // sends data to ground station, all data will b
     LoRa.endPacket();
 }
 
-String recieveData()    // returns recieved data as string
+String RecieveData()
 {
-    if (LoRa.parsePacket())
-    {
-        while (LoRa.available())
-        {
-            recievedData += (char)LoRa.read();
+    int packetSize = LoRa.parsePacket();
+    if (packetSize) {
+        while (LoRa.available()) {
+            return LoRa.readString();
         }
-
-        //Serial.print("Received: ");
-        //Serial.println(recievedData);
-
-        return recieveData;
     }
 }
 
@@ -307,7 +295,7 @@ void loop()
     // check for parachute deployment
     if (realAltitude > 2 && isFalling)  // deploy parachute if falling and above 2m
         deployParachute();
-    else if (recieveData() == "DEPLOY") // deploy parachute if recieve "DEPLOY" from ground
+    else if (RecieveData() == "DEPLOY") // deploy parachute if recieve "DEPLOY" from ground
         deployParachute(); 
 
     // Apogee sending
