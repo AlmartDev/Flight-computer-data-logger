@@ -30,4 +30,6 @@ The code is developed using VSCode, but it is compatible with any IDE you want. 
 ## PCB Design
 The PCB design is available at [this link](https://oshwlab.com/alonsomartinezcarratala/rocket). But you can download the gerber file from the repository.
 
+## It is Open Source!
+
 Feel free to contribute and make improvements to the firmware for a more successful rocket launch!
