@@ -1,8 +1,4 @@
-#include <RH_RF95.h>
- 
-#define RFM95_CS 10   // SX1278 chip select pin
-#define RFM95_RST 9   // SX1278 reset pin
-#define RFM95_INT 2   // SX1278 interrupt pin (change it according to your setup)
+#include <LoRa.h>
  
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
@@ -13,9 +9,7 @@ float startAltitude, altitude;
 float startPressure;
  
 Adafruit_BMP085 barometer;
- 
-RH_RF95 rf95(RFM95_CS, RFM95_INT);
- 
+  
 void initBarometric() {
     Serial.println("Initializing Barometric sensors");
  
@@ -29,25 +23,36 @@ void initBarometric() {
     startPressure = barometer.readPressure();
     startAltitude = barometer.readAltitude(startPressure);
 }
+
+void initCommms()
+{
+    Serial.print("Initializing LoRa comms  -  ");
+    //SendData("Initializing LoRa comms  -  ");
+
+    if (!LoRa.begin(915E6))  // initialize ratio at 915 MHz
+    { 
+        Serial.println("ERROR");
+        //SendData("ERROR");
+        while (true)
+            ;
+    }
+    Serial.println("done.");
+    //SendData("done.");
+}
  
 void setup() {
   Serial.begin(9600);
  
-  if (!rf95.init()) {
-    Serial.println("LoRa initialization failed");
-    while (1);
-  }
- 
+  initCommms();
   initBarometric();
- 
- 
-  Serial.println("LoRa initialization successful!");
- 
-  // Setup ISM frequency
-  rf95.setFrequency(433.0);
- 
-  // Set transmit power (range from 5 to 23, default is 13dBm)
-  rf95.setTxPower(13);
+}
+
+template <typename remoteData>
+void SendData(remoteData data)  // sends data to ground station, all data will be send in a new line
+{
+    LoRa.beginPacket();
+    LoRa.print(String(data));
+    LoRa.endPacket();
 }
  
 void loop() {
@@ -59,17 +64,8 @@ void loop() {
   //Serial.print(temperature);
  
   float realAltitude = altitude - startAltitude;
- 
-  // Send a message
-  char str[32];
-  dtostrf(realAltitude, 8, 2, str);
- 
-  const char* messageToSend = str;
-  rf95.send((uint8_t*)messageToSend, strlen(messageToSend));
-  rf95.waitPacketSent();
-  Serial.println("Message sent");
-  Serial.println(messageToSend);
- 
- 
-  delay(100); // Delay before sending the next message
+  
+  SendData("Testttt!!!!");
+  
+  delay(1000); // Delay before sending the next message
 }
