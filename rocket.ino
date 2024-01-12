@@ -20,8 +20,6 @@ Adafruit_MPU6050 gyroscope;
 Servo servo;
 
 // Variables
-// It uses around 90% of the Arduino nano's memory, so some optimizations are needed for future versions
-
 byte startAltitude, altitude, realAltitude;
 byte apogee;
 byte temperature;
@@ -54,7 +52,7 @@ void initBarometric()
     startAltitude = barometer.readAltitude(startPressure);
 }
 
-void initCommms()
+void initComms()
 {
     Serial.print("Initializing LoRa comms  -  ");
     //SendData("Initializing LoRa comms  -  ");
@@ -139,7 +137,7 @@ void setup()
     //SendData("Initializing systems...");
 
     // initialize systems
-    initCommms();
+    initComms();
     initBarometric();
     initServo();
     initSD();
