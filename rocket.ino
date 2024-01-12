@@ -230,7 +230,7 @@ void updateBarometric()
     temperature = barometer.readTemperature();
     altitude = barometer.readAltitude(startPressure);
 
-    float previousAltitude = realAltitude;
+    byte previousAltitude = realAltitude;
 
     realAltitude = altitude - startAltitude;
 
@@ -248,7 +248,6 @@ void updateBarometric()
         apogee = previousAltitude;
         isFalling = true;
     }
-
     if (realAltitude > apogee)
         apogee = realAltitude;
 }
@@ -288,6 +287,7 @@ void loop()
 {
     // updates
     updateBarometric();
+    delay(100);
     updateGyroscope();
 
     // check for parachute deployment
