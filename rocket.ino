@@ -12,9 +12,9 @@
 
 #include <Servo.h>
 
-#include <SD.h>
-
-#include <LoRa.h>
+// Custom Libraries
+#include "include/comms.h"
+#include "include/SDcard.h"
 
 #define LORA_SS 10
 #define LORA_RST 9
@@ -25,6 +25,9 @@ Adafruit_BMP085 barometer;
 Adafruit_MPU6050 gyroscope;
 Servo servo;
 
+Lora lora(433E6, LORA_SS, LORA_RST, LORA_DIO0);
+SDcard SD(7);
+
 // Variables
 byte startAltitude, altitude, realAltitude;
 byte apogee;
@@ -33,7 +36,6 @@ byte temperature;
 int startPressure;
 
 const byte servoPin = A0;
-const byte chipSelect = 7;
 
 bool isFalling = false;
 
@@ -42,73 +44,44 @@ bool isFalling = false;
 void initBarometric()
 {
     Serial.print("Initializing Barometric sensors  -  ");
-    //SendData("Initializing Barometric sensors  -  ");
+    //lora.sendData("Initializing Barometric sensors  -  ");
 
     if (!barometer.begin())
     {
         Serial.println("ERROR");
-        //SendData("ERROR");
+        //lora.sendData("ERROR");
         while (1)
             ;
     }
     Serial.println("done.");
-    //SendData("done.");
+    //lora.sendData("done.");
     
     startPressure = barometer.readPressure();
     startAltitude = barometer.readAltitude(startPressure);
 }
 
-void initComms()
-{
-    Serial.print("Initializing LoRa systems  -  ");
-
-    if (!LoRa.begin(433E6)) {   // initialize ratio at 433 MHz
-        Serial.println("ERROR");
-        while (1);
-    }
- 
-    Serial.println("done.");
-    //SendData("LoRa systems initialized");
-}
-
 void initServo()
 {
     Serial.print("Initializing Servo  -  ");
-    //SendData("Initializing Servo  -  ");
+    //lora.sendData("Initializing Servo  -  ");
 
     servo.attach(servoPin);
     servo.write(0); // CHANGE BEFORE FLIGHT -------------
 
     Serial.println("done.");
-    //SendData("done.");
-}
-
-void initSD()
-{
-    Serial.print("Initializing SD card  -  ");
-    //SendData("Initializing SD card  -  ");
-
-    if (!SD.begin(chipSelect))
-    {
-        Serial.println("ERROR");
-        //SendData("ERROR");
-        while (1)
-            ;
-    }
-    Serial.println("done.");
-    //SendData("done.");
+    //lora.sendData("done.");
 }
 
 void initGyroscope()
 {
     Serial.print("Initializing Gyroscope/Accelerometer  -  ");
-    //SendData("Initializing Gyroscope/Accelerometer  -  ");
+    //lora.sendData("Initializing Gyroscope/Accelerometer  -  ");
 
     // Try to initialize!
     if (!gyroscope.begin())
     {
         Serial.print("ERROR");
-        //SendData("ERROR");
+        //lora.sendData("ERROR");
         while (1)
         {
             delay(10);
@@ -123,7 +96,7 @@ void initGyroscope()
     gyroscope.setMotionInterrupt(true);
 
     Serial.print("done.");
-    //SendData("done.");
+    //lora.sendData("done.");
 
     apogee = 2; // So computer doesn't think it is on apogee at start.
 
@@ -135,100 +108,30 @@ void initGyroscope()
 
 void setup()
 {
+    
     Serial.begin(9600);
     while (!Serial);    // wait for serial port to connect. Needed for native USB port only
 
     Serial.println("Initializing systems...");
-    //SendData("Initializing systems...");
+    //lora.sendData("Initializing systems...");
+
+    // Lora and SD card are initialized in their own classes
 
     // initialize systems
-    initComms();
     initBarometric();
     initServo();
-    initSD();
     initGyroscope();
 
     Serial.println("Initialization complete.");
     Serial.println("");
 
-    // SendData("Initialization complete.");
+    // lora.sendData("Initialization complete.");
 
     // clear SD card before logging
-    clearSD();
-    writeSDln("LOGGING STARTED");
-    writeSDln("All systems initialized  -  Logging started");
-    writeSDln("");
-}
-
-// --------------
-
-// Remote comms
-
-template <typename remoteData>
-void SendData(remoteData data)  // sends data to ground station, all data will be send in a new line
-{
-    LoRa.beginPacket();
-    LoRa.print(String(data));
-    LoRa.endPacket();
-}
-
-String RecieveData()
-{
-    int packetSize = LoRa.parsePacket();
-    if (packetSize) {
-        while (LoRa.available()) {
-            return LoRa.readString();
-        }
-    }
-}
-
-// --------------
-
-void clearSD()
-{
-    File dataFile = SD.open("DATALOG.txt", FILE_WRITE  | O_TRUNC);
-
-    if (dataFile)
-    {
-        dataFile.println("");
-        dataFile.close();
-    }
-    else
-    {
-        Serial.println("ERROR opening DATALOG.txt");
-    }
-}
-
-template <typename writeData>
-void writeSD(writeData data)
-{
-    File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
-
-    if (dataFile)
-    {
-        dataFile.print(data);
-        dataFile.close();
-    }
-    else
-    {
-        Serial.println("ERROR opening DATALOG.txt");
-    }
-}
-
-template <typename writeDataLn>
-void writeSDln(writeDataLn data)
-{
-    File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
-
-    if (dataFile)
-    {
-        dataFile.println(data);
-        dataFile.close();
-    }
-    else
-    {
-        Serial.println("ERROR opening DATALOG.txt");
-    }
+    SD.clear();
+    SD.write("LOGGING STARTED");
+    SD.write("All systems initialized  -  Logging started");
+    SD.writeln("");
 }
 
 // updates
@@ -249,10 +152,10 @@ void updateBarometric()
     */
 
     // write values to SD card
-    writeSD("a: ");
-    writeSD(altitude - startAltitude);
-    writeSD(" - t°C: ");
-    writeSDln(temperature);
+    SD.write("a: ");
+    SD.write(altitude - startAltitude);
+    SD.write(" - t°C: ");
+    SD.writeln(temperature);
 
     // Calculate apogee and if falling
 
@@ -286,15 +189,15 @@ void updateGyroscope()
         */
 
         // write values to SD card
-        writeSD("GyroX:");
-        writeSD(g.gyro.x);
-        writeSD(",");
-        writeSD("GyroY:");
-        writeSD(g.gyro.y);
-        writeSD(",");
-        writeSD("GyroZ:");
-        writeSD(g.gyro.z);
-        writeSDln("");
+        SD.write("GyroX:");
+        SD.write(g.gyro.x);
+        SD.write(",");
+        SD.write("GyroY:");
+        SD.write(g.gyro.y);
+        SD.write(",");
+        SD.write("GyroZ:");
+        SD.write(g.gyro.z);
+        SD.writeln("");
     }
 }
 
@@ -303,7 +206,7 @@ void deployParachute()
     servo.write(180); // CHANGE BEFORE FLIGHT -------------
                       // angle of 0 degrees should also work 
 
-    //writeSDln("PARACHUTE DEPLOYED");
+    //SD.write("PARACHUTE DEPLOYED");
     //SendData("PARACHUTE DEPLOYED");
 }
 
@@ -324,12 +227,12 @@ void loop()
     bool apogeeSent = false;
     if (isFalling && !apogeeSent)
     {
-        writeSDln("APOGEE REACHED");
-        writeSD("APOGEE: ");
-        writeSDln(apogee);
+        SD.writeln("APOGEE REACHED");
+        SD.write("APOGEE: ");
+        SD.writeln(apogee);
 
-        SendData("APOGEE REACHED");
-        //SendData(apogee);
+        lora.sendData("APOGEE REACHED");
+        //lora.sendData(apogee);
 
         Serial.print("APOGEE REACHED:  ");
         Serial.println(apogee);
