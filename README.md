@@ -2,7 +2,8 @@
 
 This repository contains the firmware for the rocket's flight computer (UAV) and its launch control platforms. The code is written in Arduino C++ and is specifically tailored for the Arduino Nano on a custom flight computer board.
 
-For newer code please take a look into ```tests``` branch. Code might not work or not be organized.
+> [!NOTE]
+> For newer code please take a look into ```tests``` branch. Code might not work or not be organized.
 
 ## Features
 - **Remote Communication:** The firmware enables remote communication with each platform.
