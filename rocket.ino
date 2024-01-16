@@ -14,6 +14,10 @@
 
 #include <LoRa.h>
 
+#define LORA_SS 10
+#define LORA_RST 9
+#define LORA_DIO0 2
+
 // Class instances
 Adafruit_BMP085 barometer;
 Adafruit_MPU6050 gyroscope;
@@ -54,18 +58,15 @@ void initBarometric()
 
 void initComms()
 {
-    Serial.print("Initializing LoRa comms  -  ");
-    //SendData("Initializing LoRa comms  -  ");
+    Serial.print("Initializing LoRa systems  -  ");
 
-    if (!LoRa.begin(915E6))  // initialize ratio at 915 MHz
-    { 
+    if (!LoRa.begin(433E6)) {   // initialize ratio at 433 MHz
         Serial.println("ERROR");
-        //SendData("ERROR");
-        while (true)
-            ;
+        while (1);
     }
+ 
     Serial.println("done.");
-    //SendData("done.");
+    //SendData("LoRa systems initialized");
 }
 
 void initServo()
@@ -133,6 +134,8 @@ void initGyroscope()
 void setup()
 {
     Serial.begin(9600);
+    while (!Serial);    // wait for serial port to connect. Needed for native USB port only
+
     Serial.println("Initializing systems...");
     //SendData("Initializing systems...");
 
@@ -287,7 +290,7 @@ void loop()
 {
     // updates
     updateBarometric();
-    delay(100);
+    delay(100);     // this stops the two updates from interfering with each other and causing the "multiple setups bug"
     updateGyroscope();
 
     // check for parachute deployment
@@ -305,7 +308,7 @@ void loop()
         writeSDln(apogee);
 
         SendData("APOGEE REACHED");
-        SendData(apogee);
+        //SendData(apogee);
 
         Serial.print("APOGEE REACHED:  ");
         Serial.println(apogee);
@@ -313,5 +316,5 @@ void loop()
         apogeeSent = true; // only send the apogee once
     }
 
-    delay(100); // updates every 10 times/s
+    delay(500); // updates 2/sec due to comms problems
 }

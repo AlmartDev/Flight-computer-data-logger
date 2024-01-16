@@ -8,7 +8,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial);
   
-  Serial.print("Initializing LoRa receiver  -");
+  Serial.print("Initializing LoRa receiver  -  ");
 
   if (!LoRa.begin(433E6)) { 
     Serial.println("ERROR");
