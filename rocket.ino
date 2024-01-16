@@ -1,4 +1,6 @@
 /* Flight logging system firmware for Arduino Nano */
+/* Open Source project from https://github.com/almartdev/flight-computer-data-logger */
+/* TODO: Make SD & comms functions simple class to include */
 
 // Including
 #include <Adafruit_BMP085.h>
@@ -153,7 +155,9 @@ void setup()
 
     // clear SD card before logging
     clearSD();
-    writeSD("LOGGING STARTED");
+    writeSDln("LOGGING STARTED");
+    writeSDln("All systems initialized  -  Logging started");
+    writeSDln("");
 }
 
 // --------------
@@ -244,7 +248,13 @@ void updateBarometric()
     Serial.println(temperature);
     */
 
-   // Calculate apogee and if falling
+    // write values to SD card
+    writeSD("a: ");
+    writeSD(altitude - startAltitude);
+    writeSD(" - t°C: ");
+    writeSDln(temperature);
+
+    // Calculate apogee and if falling
 
     if (realAltitude < previousAltitude)
     {
@@ -274,6 +284,17 @@ void updateGyroscope()
         Serial.print(g.gyro.z);
         Serial.println("");
         */
+
+        // write values to SD card
+        writeSD("GyroX:");
+        writeSD(g.gyro.x);
+        writeSD(",");
+        writeSD("GyroY:");
+        writeSD(g.gyro.y);
+        writeSD(",");
+        writeSD("GyroZ:");
+        writeSD(g.gyro.z);
+        writeSDln("");
     }
 }
 
