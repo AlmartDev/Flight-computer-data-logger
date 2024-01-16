@@ -151,13 +151,15 @@ void setup()
     Serial.println("Initialization complete.");
     Serial.println("");
 
+    SendData("Initialization complete.");
+
     // SendData("Initialization complete.");
 
     // clear SD card before logging
-    clearSD();
-    writeSDln("LOGGING STARTED");
-    writeSDln("All systems initialized  -  Logging started");
-    writeSDln("");
+    //clearSD();
+    //writeSDln("LOGGING STARTED");
+    //writeSDln("All systems initialized  -  Logging started");
+    //writeSDln("");
 }
 
 // --------------
@@ -248,11 +250,13 @@ void updateBarometric()
     Serial.println(temperature);
     */
 
+    // TODO: write it all at once using a String += data or something like that
+
     // write values to SD card
-    writeSD("a: ");
+   /*writeSD("a: ");
     writeSD(altitude - startAltitude);
     writeSD(" - t°C: ");
-    writeSDln(temperature);
+    writeSDln(temperature);*/
 
     // Calculate apogee and if falling
 
@@ -263,6 +267,7 @@ void updateBarometric()
     }
     if (realAltitude > apogee)
         apogee = realAltitude;
+
 }
 
 void updateGyroscope()
@@ -285,8 +290,10 @@ void updateGyroscope()
         Serial.println("");
         */
 
+        // TODO: write it all at once using a String += data or something like that
+
         // write values to SD card
-        writeSD("GyroX:");
+        /*writeSD("GyroX:");
         writeSD(g.gyro.x);
         writeSD(",");
         writeSD("GyroY:");
@@ -294,7 +301,7 @@ void updateGyroscope()
         writeSD(",");
         writeSD("GyroZ:");
         writeSD(g.gyro.z);
-        writeSDln("");
+        writeSDln("");*/
     }
 }
 
@@ -311,7 +318,7 @@ void loop()
 {
     // updates
     updateBarometric();
-    delay(100);     // this stops the two updates from interfering with each other and causing the "multiple setups bug"
+    delay(500);
     updateGyroscope();
 
     // check for parachute deployment
