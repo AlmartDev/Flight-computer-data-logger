@@ -22,7 +22,7 @@ The code is developed using VSCode, but it is compatible with any IDE you want. 
 - Adafruit MPU6050
 - Adafruit BMP180
 - Adafruit breakout board+ with 8GB MicroSD card (FAT32 format)
-- SX1278 LoRa-02 with antenna
+- SX1278 LoRa-02 with antenna using the 433 MHz frequency
 - Arduino Nano
 - 5 gram. servos
 - 7.4V 2S LiPo battery with Deans T connector

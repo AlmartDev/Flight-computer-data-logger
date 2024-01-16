@@ -7,26 +7,26 @@
 void setup() {
   Serial.begin(9600);
   while (!Serial);
- 
-  // Initialize LoRa module
-  if (!LoRa.begin(433E6)) { // Change the frequency to match your LoRa module's frequency
-    Serial.println("LoRa initialization failed. Check your wiring!");
+  
+  Serial.print("Initializing LoRa receiver  -");
+
+  if (!LoRa.begin(433E6)) { 
+    Serial.println("ERROR");
     while (1);
   }
  
-  Serial.println("LoRa Receiver Initialized");
+  Serial.println("done.");
 }
  
 void loop() {
-  // Check for incoming messages
   int packetSize = LoRa.parsePacket();
  
   if (packetSize) {
-    Serial.println("Received a message:");
+    Serial.print("->  ");
  
     // Read the message
     while (LoRa.available()) {
-      Serial.print((char)LoRa.read());
+      Serial.println((char)LoRa.read());
     }
  
     Serial.println();
